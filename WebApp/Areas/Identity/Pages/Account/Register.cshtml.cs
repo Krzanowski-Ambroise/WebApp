@@ -30,13 +30,15 @@ namespace WebApp.Areas.Identity.Pages.Account
         private readonly IUserEmailStore<ApplicationUser> _emailStore;
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _emailSender;
+        private readonly RoleManager<IdentityRole> _roleManager;
 
         public RegisterModel(
             UserManager<ApplicationUser> userManager,
             IUserStore<ApplicationUser> userStore,
             SignInManager<ApplicationUser> signInManager,
             ILogger<RegisterModel> logger,
-            IEmailSender emailSender)
+            IEmailSender emailSender,
+            RoleManager<IdentityRole> roleManager)
         {
             _userManager = userManager;
             _userStore = userStore;
@@ -44,6 +46,7 @@ namespace WebApp.Areas.Identity.Pages.Account
             _signInManager = signInManager;
             _logger = logger;
             _emailSender = emailSender;
+            _roleManager = roleManager;
         }
 
         /// <summary>
@@ -150,6 +153,15 @@ namespace WebApp.Areas.Identity.Pages.Account
 
                     await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
                         $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+
+                    // Vérifie si le rôle 'Membre' existe, sinon le crée
+                    if (!await _roleManager.RoleExistsAsync("Membre"))
+                    {
+                        await _roleManager.CreateAsync(new IdentityRole("Membre"));
+                    }
+
+                    // Attribuer le rôle 'Membre' à l'utilisateur
+                    await _userManager.AddToRoleAsync(user, "Membre");
 
                     if (_userManager.Options.SignIn.RequireConfirmedAccount)
                     {

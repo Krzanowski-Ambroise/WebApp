@@ -1,0 +1,66 @@
+﻿@{
+    ViewData["Title"] = "Gérer les entreprises";
+
+}
+
+<h1>Gérer les entreprises de @ViewData["UserName"]</h1>
+
+<h2>Entreprises associées</h2>
+
+<div class="row">
+    @foreach (var company in (List<WebApp.Models.TCompany>)ViewData["AssociatedCompanies"])
+    {
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 d-flex flex-column">
+                <div class="card-body">
+                    <h5 class="card-title">@company.CompanieName</h5>
+                    <p class="card-text">
+                        <strong>SIRET :</strong> @company.Siret <br />
+                        <strong>Description :</strong> @company.Description <br />
+                        <strong>Création :</strong> @(company.CreationDate?.ToString("dd MMM yyyy") ?? "N/A") <br />
+                        <strong>Téléphone :</strong> @(company.Phone?.ToString() ?? "N/A") <br />
+                        <strong>Site Web :</strong>
+                        @if (!string.IsNullOrEmpty(company.Website))
+                        {
+                            <a href="https://@company.Website" target="_blank">@company.Website</a>
+                        }
+                        else
+                        {
+                            <span>N/A</span>
+                        }
+                    </p>
+                </div>
+                <div class="card-footer bg-transparent border-0 mt-auto">
+                    <form asp-action="RemoveCompany" method="post">
+                        <input type="hidden" name="userId" value="@ViewData["UserId"]" />
+                        <input type="hidden" name="companyId" value="@company.Id" />
+                        <button type="submit" class="btn btn-danger btn-sm w-100">Supprimer</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+
+<h2>Ajouter une entreprise</h2>
+
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger">
+        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+        {
+            <p class="mb-0">@error.ErrorMessage</p>
+        }
+    </div>
+}
+
+<form asp-action="AddCompany" method="post">
+    <input type="hidden" name="UserId" value="@ViewData["UserId"]" />
+    <div class="form-group mb-3">
+        <label>Sélectionner une entreprise</label>
+        <select name="CompanyId" asp-items="@(ViewData["AvailableCompanies"] as SelectList)" class="form-control"></select>
+    </div>
+    <a href="@Url.Action("ListUser", "Admin")" class="btn btn-secondary">Retour à la liste des utilisateurs</a>
+    <button type="submit" class="btn btn-primary">Ajouter</button>
+</form>

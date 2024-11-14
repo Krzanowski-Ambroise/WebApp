@@ -1,0 +1,90 @@
+﻿@page
+@model WebApp.Areas.Identity.Pages.Account.Manage.ListExerceModel
+@{
+    ViewData["Title"] = "Métiers Exercés";
+}
+
+<h3>Métiers Exercés</h3>
+
+<!-- Bouton pour ouvrir la modale d'ajout de métier -->
+<button type="button" class="btn btn-primary mb-4" data-bs-toggle="modal" data-bs-target="#addExerceModal">
+    Ajouter un métier
+</button>
+
+<!-- Modale Bootstrap pour ajouter un métier -->
+<div class="modal fade" id="addExerceModal" tabindex="-1" aria-labelledby="addExerceModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addExerceModalLabel">Ajouter un métier</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addExerceForm" asp-page-handler="AddExerce" method="post">
+                    <div class="mb-3">
+                        <label for="SiteId" class="form-label">Site</label>
+                        <select id="SiteId" name="NewExerce.SiteId" class="form-select" required>
+                            <option value="">Sélectionnez un site</option>
+                            @foreach (var site in Model.Sites)
+                            {
+                                <option value="@site.Id">@site.Companie?.CompanieName - @site.Title</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="PosteId" class="form-label">Poste</label>
+                        <select id="PosteId" name="NewExerce.PosteId" class="form-select" required>
+                            <option value="">Sélectionnez un poste</option>
+                            @foreach (var poste in Model.Postes)
+                            {
+                                <option value="@poste.Id">@poste.Title</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="TypeOfContractId" class="form-label">Type de contrat</label>
+                        <select id="TypeOfContractId" name="NewExerce.TypeOfContractId" class="form-select" required>
+                            <option value="">Sélectionnez un type de contrat</option>
+                            @foreach (var contract in Model.TypeOfContracts)
+                            {
+                                <option value="@contract.Id">@contract.ContractName</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="StartDate" class="form-label">Date de début</label>
+                        <input type="date" name="NewExerce.StartDate" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label for="EndDate" class="form-label">Date de fin</label>
+                        <input type="date" name="NewExerce.EndDate" class="form-control" />
+                    </div>
+                    <button type="submit" class="btn btn-primary">Ajouter</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Liste des métiers exercés affichée en ligne -->
+<div class="list-group">
+    @foreach (var exerce in Model.Exerces)
+    {
+        <div class="list-group-item d-flex align-items-center justify-content-between">
+            <div>
+                <h5 class="mb-1">@exerce.Site.Companie?.CompanieName - @exerce.Site.Title</h5>
+                <p class="mb-1">
+                    <strong>Poste :</strong> @(exerce.Poste?.Title ?? "Non spécifié")<br>
+                    <strong>Type de contrat :</strong> @exerce.TypeOfContract.ContractName<br>
+                    <strong>Date de début :</strong> @exerce.StartDate.ToString("yyyy-MM-dd")<br>
+                    <strong>Date de fin :</strong> @(exerce.EndDate?.ToString("yyyy-MM-dd") ?? "jusqu'à ce jour")
+                </p>
+            </div>
+            <form method="post" asp-page-handler="RemoveExerce" asp-route-id="@exerce.Id" style="display:inline;">
+                <button type="submit" class="btn btn-link text-dark p-0" style="text-decoration: none;" onclick="return confirm('Voulez-vous vraiment supprimer ce métier ?');">
+                    Supprimer le métier
+                </button>
+            </form>
+        </div>
+    }
+</div>

@@ -1,0 +1,128 @@
+﻿@page "{companyId:int}"
+@model WebApp.Areas.Identity.Pages.Account.Manage.ViewPostsModel
+@{
+    ViewData["Title"] = "Liste des posts";
+}
+
+<a class="btn btn-secondary mt-3" asp-page="./MyCompanies">🠔 Retourner à vos entreprises</a>
+
+<h1>Liste des posts pour @Model.CompanyName</h1>
+@if (User.IsInRole("Enterprise"))
+{
+    <div class="mb-3">
+        <a class="btn btn-success mt-3" asp-page="./AddJobPost" asp-route-companyId="@Model.CompanyId">Ajouter un Post</a>
+    </div>
+}
+<p>Voici les postes disponibles pour l'entreprise :</p>
+
+@if (Model.JobPosts.Any())
+{
+    <div class="row">
+        @foreach (var jobPost in Model.JobPosts)
+        {
+            <div class="col-md-6 mb-4">
+                <div class="card shadow-sm h-100 d-flex flex-column">
+                    <div class="card-body flex-grow-1 d-flex flex-column">
+                        <h5 class="card-title">@jobPost.Title</h5>
+                        <p class="card-text flex-grow-1">
+                            <strong>Description :</strong> @jobPost.Description <br>
+                            <strong>Type de contrat :</strong> @jobPost.TypeOfContract?.ContractName <br>
+                            <strong>Poste :</strong> @jobPost.Poste?.Title <br>
+                            <strong>Lieu :</strong> @jobPost.Site?.Title, @jobPost.Site?.City <br>
+                            <strong>Distance :</strong> Calcul en cours... km<br>
+                            <strong>Compatibilité du profil :</strong> À évaluer... %<br>
+                        </p>
+
+                        <h6>Compétences requises :</h6>
+                        @if (jobPost.TJobPostRequirements != null && jobPost.TJobPostRequirements.Any())
+                        {
+                            var displayedRequirements = jobPost.TJobPostRequirements
+                            .OrderByDescending(r => r.Evaluation)
+                            .ThenByDescending(r => r.YearsOfExperience)
+                            .Take(5)
+                            .ToList();
+
+                            var additionalRequirementsCount = jobPost.TJobPostRequirements.Count - displayedRequirements.Count;
+
+                            <ul class="list-group list-group-flush mb-3">
+                                @foreach (var requirement in displayedRequirements)
+                                {
+                                    <li class="list-group-item">
+                                        <strong>@requirement.RequirementType.TypeName</strong> - Évaluation : @requirement.Evaluation, Années d'expérience : @requirement.YearsOfExperience
+                                    </li>
+                                }
+                            </ul>
+
+                            @if (additionalRequirementsCount > 0)
+                            {
+                                <p class="text-muted">… et @additionalRequirementsCount autres compétences</p>
+                            }
+                        }
+                        else
+                        {
+                            <p>Aucune compétence requise définie pour ce post.</p>
+                        }
+
+                        <!-- Bouton pour ouvrir le modal de détails -->
+                        <button class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#detailsModal-@jobPost.Id">
+                            Voir les détails
+                        </button>
+
+                        @if (User.IsInRole("Enterprise"))
+                        {
+                            <div class="mt-3 d-flex">
+                                <a class="btn btn-primary w-50 me-2" asp-page="./ManageRequirements" asp-route-jobPostId="@jobPost.Id">Gérer les exigences</a>
+                                <form method="post" asp-page-handler="DeleteJobPost" asp-route-jobPostId="@jobPost.Id" class="w-50">
+                                    <button type="submit" class="btn btn-danger w-100">Supprimer</button>
+                                </form>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal de détails -->
+            <div class="modal fade" id="detailsModal-@jobPost.Id" tabindex="-1" aria-labelledby="detailsModalLabel-@jobPost.Id" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="detailsModalLabel-@jobPost.Id">@jobPost.Title – Détails</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p><strong>Description :</strong> @jobPost.Description</p>
+                            <p><strong>Type de contrat :</strong> @jobPost.TypeOfContract?.ContractName</p>
+                            <p><strong>Poste :</strong> @jobPost.Poste?.Title</p>
+                            <p><strong>Lieu :</strong> @jobPost.Site?.Title, @jobPost.Site?.City</p>
+                            <p><strong>Adresse :</strong> @jobPost.Site?.Street, @jobPost.Site?.City, @jobPost.Site?.Postcode</p>
+                            <p><strong>Distance :</strong> Calcul en cours... km</p>
+                            <p><strong>Compatibilité du profil :</strong> À évaluer... %</p>
+
+                            <h6>Compétences requises :</h6>
+                            @if (jobPost.TJobPostRequirements != null && jobPost.TJobPostRequirements.Any())
+                            {
+                                <ul>
+                                    @foreach (var requirement in jobPost.TJobPostRequirements)
+                                    {
+                                        <li>
+                                            <strong>@requirement.RequirementType.TypeName</strong> – Évaluation : @requirement.Evaluation, Expérience : @requirement.YearsOfExperience années
+                                        </li>
+                                    }
+                                </ul>
+                            }
+                            else
+                            {
+                                <p>Aucune compétence requise définie pour ce post.</p>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        }
+    </div>
+}
+else
+{
+    <p>Aucun post trouvé pour cette entreprise.</p>
+}

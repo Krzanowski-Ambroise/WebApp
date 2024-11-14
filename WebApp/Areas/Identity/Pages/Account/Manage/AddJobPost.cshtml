@@ -1,0 +1,53 @@
+﻿@page "{companyId:int}"
+@model WebApp.Areas.Identity.Pages.Account.Manage.AddJobPostModel
+@{
+    ViewData["Title"] = "Ajouter un Job Post";
+}
+
+<a class="btn btn-secondary mt-3 mb-3" asp-page="./ViewPosts" asp-route-companyId="@Model.CompanyId">🠔 Retourner aux posts</a>
+
+<h1>Ajouter un Job Post pour @Model.CompanyName</h1>
+
+<form method="post">
+    <div class="form-group mb-3">
+        <label for="title">Titre</label>
+        <input type="text" id="title" name="JobPost.Title" class="form-control" required />
+    </div>
+
+    <div class="form-group mb-3">
+        <label for="description">Description</label>
+        <textarea id="description" name="JobPost.Description" class="form-control" required></textarea>
+    </div>
+
+    <div class="form-group mb-3">
+        <label for="posteId">Poste</label>
+        <select id="posteId" name="JobPost.PosteId" class="form-control" required>
+            @foreach (var poste in Model.Postes)
+            {
+                <option value="@poste.Id">@poste.Title</option>
+            }
+        </select>
+    </div>
+
+    <div class="form-group mb-3">
+        <label for="typeOfContractId">Type de contrat</label>
+        <select id="typeOfContractId" name="JobPost.TypeOfContractId" class="form-control" required>
+            @foreach (var contract in Model.TypeOfContracts)
+            {
+                <option value="@contract.Id">@contract.ContractName</option>
+            }
+        </select>
+    </div>
+
+    <div class="form-group mb-3">
+        <label for="siteId">Site</label>
+        <select id="siteId" name="JobPost.SiteId" class="form-control" required>
+            @foreach (var site in Model.Sites)
+            {
+                <option value="@site.Id">@site.Title, @site.City</option>
+            }
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Ajouter le Post</button>
+</form>

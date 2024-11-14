@@ -1,0 +1,25 @@
+﻿@page
+@model WebApp.Areas.Identity.Pages.Account.Manage.AdminPanelModel
+@{
+    ViewData["ActivePage"] = ManageNavPages.AdminPanel;
+}
+<div class="container mt-4">
+    <h3>Administration</h3>
+    <div class="list-group">
+        <a href="/TPostes" class="list-group-item list-group-item-action">
+            Listes des Métiers
+        </a>
+        <a href="/Tcompanies" class="list-group-item list-group-item-action">
+            Listes des Entreprises
+        </a>
+        <a href="/TTypeOfContracts" class="list-group-item list-group-item-action">
+            Listes des Types de Contracts
+        </a>
+        <a href="/TRequirementTypes" class="list-group-item list-group-item-action">
+            Listes Compétences
+        </a>
+        <a href="/Admin/ListUser" class="list-group-item list-group-item-action">
+            Listes Utilisateurs
+        </a>
+    </div>
+</div>

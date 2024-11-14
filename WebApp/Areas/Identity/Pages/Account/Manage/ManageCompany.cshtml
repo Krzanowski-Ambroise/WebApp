@@ -1,0 +1,145 @@
+﻿@page "{companyId:int}"
+@model WebApp.Areas.Identity.Pages.Account.Manage.ManageCompanyModel
+@{
+    ViewData["Title"] = "Gérer l'Entreprise";
+}
+
+<a class="btn btn-secondary mt-3" asp-page="./MyCompanies">🠔 Retourner à vos entreprises</a>
+
+<h1>Gérer l'Entreprise @Model.Company?.CompanieName</h1>
+
+<div class="mb-4">
+    <h4>Détails de l'entreprise</h4>
+    <p><strong>SIRET :</strong> @Model.Company?.Siret</p>
+    <p><strong>Description :</strong> @Model.Company?.Description</p>
+    <p><strong>Date de création :</strong> @Model.Company?.CreationDate?.ToString("dd/MM/yyyy")</p>
+    <p><strong>Téléphone :</strong> @Model.Company?.Phone</p>
+    <p>
+        <strong>Site web :</strong>
+        @if (!string.IsNullOrEmpty(Model.Company?.Website))
+        {
+            <a href="@Model.Company.Website" target="_blank">@Model.Company.Website</a>
+        }
+        else
+        {
+            <span>N/A</span>
+        }
+    </p>
+</div>
+
+<h4>Liste des Membres de l'entreprise</h4>
+@if (Model.CompanyMembers.Any())
+{
+    <ul class="list-group mb-4">
+        @foreach (var member in Model.CompanyMembers)
+        {
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span>@member.Email (@Model.MemberRoles[member.Id])</span>
+                <form method="post" asp-page-handler="RemoveMember" asp-route-userId="@member.Id">
+                    <button type="submit" class="btn btn-danger btn-sm">Retirer</button>
+                </form>
+            </li>
+        }
+    </ul>
+}
+else
+{
+    <p>Aucun membre associé pour le moment.</p>
+}
+
+
+<h4>Ajouter un nouveau membre</h4>
+<form method="post" asp-page-handler="AddMember" class="mb-4">
+    <input type="hidden" asp-for="CompanyId" />
+    <div class="form-group mb-3">
+        <label for="userId">Sélectionnez un utilisateur</label>
+        <select id="userId" name="userId" class="form-select" required>
+            <option value="">Sélectionnez un utilisateur</option>
+            @foreach (var user in Model.AvailableMembers)
+            {
+                <option value="@user.Id">@user.Email</option>
+            }
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Ajouter le membre</button>
+</form>
+
+<h4>Liste des Sites</h4>
+@if (Model.Sites.Any())
+{
+    <ul class="list-group mb-4">
+        @foreach (var site in Model.Sites)
+        {
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span>@site.Title - @site.Street, @site.City, @site.Postcode</span>
+                <div class="d-flex">
+                    <button type="button" class="btn btn-warning btn-sm me-2" data-bs-toggle="modal" data-bs-target="#editSiteModal-@site.Id">Modifier</button>
+                    <form method="post" asp-page-handler="RemoveSite" asp-route-siteId="@site.Id">
+                        <button type="submit" class="btn btn-danger btn-sm">Supprimer</button>
+                    </form>
+                </div>
+            </li>
+
+
+            <!-- Modale pour modifier le site -->
+            <div class="modal fade" id="editSiteModal-@site.Id" tabindex="-1" aria-labelledby="editSiteModalLabel-@site.Id" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="editSiteModalLabel-@site.Id">Modifier le site</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form method="post" asp-page-handler="EditSite">
+                                <input type="hidden" name="siteId" value="@site.Id" />
+                                <div class="form-group mb-3">
+                                    <label for="title-@site.Id">Nom du Site</label>
+                                    <input type="text" id="title-@site.Id" name="title" class="form-control" value="@site.Title" required />
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="street-@site.Id">Rue</label>
+                                    <input type="text" id="street-@site.Id" name="street" class="form-control" value="@site.Street" required />
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="city-@site.Id">Ville</label>
+                                    <input type="text" id="city-@site.Id" name="city" class="form-control" value="@site.City" required />
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="postcode-@site.Id">Code Postal</label>
+                                    <input type="number" id="postcode-@site.Id" name="postcode" class="form-control" value="@site.Postcode" required />
+                                </div>
+                                <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </ul>
+}
+else
+{
+    <p>Aucun site associé pour le moment.</p>
+}
+
+<h4>Ajouter un nouveau site</h4>
+<form method="post" asp-page-handler="AddSite" class="mb-4">
+    <input type="hidden" asp-for="CompanyId" />
+    <div class="form-group mb-3">
+        <label for="title">Nom du Site</label>
+        <input type="text" id="title" name="title" class="form-control" required />
+    </div>
+    <div class="form-group mb-3">
+        <label for="street">Rue</label>
+        <input type="text" id="street" name="street" class="form-control" required />
+    </div>
+    <div class="form-group mb-3">
+        <label for="city">Ville</label>
+        <input type="text" id="city" name="city" class="form-control" required />
+    </div>
+    <div class="form-group mb-3">
+        <label for="postcode">Code Postal</label>
+        <input type="number" id="postcode" name="postcode" class="form-control" required />
+    </div>
+    <button type="submit" class="btn btn-primary">Ajouter le Site</button>
+</form>

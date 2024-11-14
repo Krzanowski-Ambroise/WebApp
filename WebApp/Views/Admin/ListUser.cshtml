@@ -1,0 +1,34 @@
+﻿@model IEnumerable<(WebApp.Areas.Identity.Data.ApplicationUser User, IList<string> Roles)>
+<div class="container mt-3">
+    <a href="/Identity/Account/Manage/AdminPanel" class="btn btn-secondary mb-3">
+        🠔 Retour au panneau d'administration
+    </a>
+</div>
+
+<h2>Liste des utilisateurs</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Nom d'utilisateur</th>
+            <th>Email</th>
+            <th>Rôle(s)</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var userRole in Model)
+        {
+            <tr>
+                <td>@userRole.User.UserName</td>
+                <td>@userRole.User.Email</td>
+                <td>@string.Join(", ", userRole.Roles)</td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@userRole.User.Id" class="btn btn-info btn-sm">Détails</a>
+                    <a asp-action="ManageCompanies" asp-route-userId="@userRole.User.Id" class="btn btn-secondary btn-sm">Gérer ses entreprises</a>
+                    <a asp-action="AddRole" asp-route-id="@userRole.User.Id" class="btn btn-primary btn-sm">Ajouter un rôle</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

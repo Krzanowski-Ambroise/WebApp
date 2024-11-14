@@ -1,0 +1,65 @@
+﻿@page "{jobPostId:int}"
+@model WebApp.Areas.Identity.Pages.Account.Manage.ManageRequirementsModel
+@{
+    ViewData["Title"] = "Gérer les Exigences";
+}
+
+<a class="btn btn-secondary mt-3" asp-page="./ViewPosts" asp-route-companyId="@Model.CompanyId">🠔 Retour aux posts</a>
+
+<h1>Gérer les Exigences pour @Model.JobPostTitle</h1>
+
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger">
+        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+        {
+            <p class="mb-0">@error.ErrorMessage</p>
+        }
+    </div>
+}
+
+<div class="mb-4">
+    <form method="post" asp-page-handler="AddRequirement">
+        <div class="form-group mb-3">
+            <label for="requirementTypeId">Type d'exigence</label>
+            <select id="requirementTypeId" name="NewRequirement.RequirementTypeId" class="form-control" required>
+                @foreach (var type in Model.RequirementTypes)
+                {
+                    <option value="@type.Id">@type.TypeName</option>
+                }
+            </select>
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="evaluation">Évaluation</label>
+            <input type="number" id="evaluation" name="NewRequirement.Evaluation" class="form-control" required />
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="yearsOfExperience">Années d'expérience</label>
+            <input type="number" id="yearsOfExperience" name="NewRequirement.YearsOfExperience" class="form-control" required />
+        </div>
+
+        <button type="submit" class="btn btn-primary">Ajouter l'exigence</button>
+    </form>
+</div>
+
+<h4>Liste des Exigences</h4>
+@if (Model.Requirements.Any())
+{
+    <ul class="list-group">
+        @foreach (var requirement in Model.Requirements)
+        {
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span>@requirement.RequirementType.TypeName - Évaluation : @requirement.Evaluation, Expérience : @requirement.YearsOfExperience années</span>
+                <form method="post" asp-page-handler="RemoveRequirement" asp-route-requirementId="@requirement.Id" class="mb-0">
+                    <button type="submit" class="btn btn-danger btn-sm">Supprimer</button>
+                </form>
+            </li>
+        }
+    </ul>
+}
+else
+{
+    <p>Aucune exigence ajoutée pour ce post.</p>
+}
