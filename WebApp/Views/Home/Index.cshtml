@@ -2,8 +2,58 @@
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-    <p>User Id : @ViewData["UserID"]</p>
+<div class="container mt-5 text-center" style="max-width: 800px;">
+    <!-- Titre principal de la page -->
+    <h1 class="display-4">Bienvenue sur InfoSphere</h1>
+    <p class="lead mb-4">Trouvez facilement des offres d'emploi et des entreprises !</p>
+
+    <!-- Formulaire de recherche centralisé avec largeur limitée -->
+    <form class="d-flex justify-content-center mb-5" method="get" action="/TJobPosts/List">
+        <input class="form-control form-control-lg me-2" style="max-width: 500px;" type="search" name="searchTitle" placeholder="Rechercher un poste, une entreprise ou une compétence" aria-label="Search" value="@ViewData["searchTitle"]">
+        <button class="btn btn-outline-success btn-lg" type="submit">Rechercher</button>
+    </form>
+
+    <!-- Suggestions de sections pour donner de la structure à la page -->
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <h4>Dernières Offres</h4>
+            <p>Découvrez les nouvelles opportunités de travail disponibles.</p>
+        </div>
+        <div class="col-md-4 mb-3">
+            <h4>Entreprises Populaires</h4>
+            <p>Explorez les entreprises les plus recherchées par les candidats.</p>
+        </div>
+        <div class="col-md-4 mb-3">
+            <h4>Compétences en Demande</h4>
+            <p>Consultez les compétences les plus demandées par les recruteurs.</p>
+        </div>
+    </div>
+
+    <!-- Message d'accueil personnalisé en fonction du rôle de l'utilisateur -->
+    @if (User.IsInRole("Admin"))
+    {
+        <p class="mt-4 text-muted">Hi Admin !</p>
+    }
+    else
+    {
+        <p class="mt-4 text-muted">Hi Member</p>
+    }
 </div>
+
+<!-- Ancienne navigation de développement, laissée en commentaire -->
+<!--
+<div class="container">
+    <h3>Dev Navigation</h3>
+    <ul>
+        <li><a href="/TCompanies">Companies</a></li>
+        <li><a href="/TExerces">Exerces</a></li>
+        <li><a href="/TPostes">Postes</a></li>
+        <li><a href="/TSites">Sites</a></li>
+        <li><a href="/TJobPosts">JobPosts</a></li>
+        <li><a href="/TJobPostRequirements">JobPost Requirements</a></li>
+        <li><a href="/TTypeOfContracts">Type of Contracts</a></li>
+        <li><a href="/TUserRequirements">User Requirements</a></li>
+        <li><a href="/TRequirementTypes">Requirement Types</a></li>
+    </ul>
+</div>
+-->

@@ -1,0 +1,34 @@
+﻿@model (WebApp.Areas.Identity.Data.ApplicationUser User, IList<string> Roles)
+
+
+<h2>Détails de l'utilisateur</h2>
+
+<div>
+    <h4>Informations de l'utilisateur</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-3">Nom d'utilisateur</dt>
+        <dd class="col-sm-9">@Model.User.UserName</dd>
+
+        <dt class="col-sm-3">Email</dt>
+        <dd class="col-sm-9">@Model.User.Email</dd>
+
+        <dt class="col-sm-3">Prénom</dt>
+        <dd class="col-sm-9">@Model.User.FirstName</dd>
+
+        <dt class="col-sm-3">Nom</dt>
+        <dd class="col-sm-9">@Model.User.LastName</dd>
+
+        <dt class="col-sm-3">Rôles</dt>
+        <dd class="col-sm-9">@string.Join(", ", Model.Roles)</dd>
+    </dl>
+
+    <div class="mt-4">
+        <a href="@Url.Action("ListUser", "Admin")" class="btn btn-secondary">Retour à la liste des utilisateurs</a>
+        <a href="@Url.Action("Edit", "Admin", new { id = Model.User.Id })" class="btn btn-primary">Modifier</a>
+        <form asp-action="Delete" asp-controller="Admin" method="post" class="d-inline" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?');">
+            <input type="hidden" name="id" value="@Model.User.Id" />
+            <button type="submit" class="btn btn-danger">Supprimer</button>
+        </form>
+    </div>
+</div>

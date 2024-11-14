@@ -1,0 +1,39 @@
+﻿@model WebApp.Models.TUserRequirement
+
+<form id="addRequirementForm" asp-action="AddRequirement" asp-controller="TUserRequirements" method="post">
+    <input type="hidden" name="UserId" value="@User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value" />
+
+    <div class="mb-3">
+        <label for="RequirementTypeId" class="form-label">Type de compétence</label>
+        <select id="RequirementTypeId" name="RequirementTypeId" class="form-select" required>
+            <option value="">Sélectionnez un type</option>
+            @foreach (var type in (List<WebApp.Models.TRequirementType>)ViewData["RequirementTypes"])
+            {
+                <option value="@type.Id">@type.TypeName</option>
+            }
+        </select>
+        <span asp-validation-for="RequirementTypeId" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label for="PersonalEvaluation" class="form-label">Évaluation personnelle</label>
+        <input type="number" asp-for="PersonnalEvaluation" class="form-control" required />
+        <span asp-validation-for="PersonnalEvaluation" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label for="StartDate" class="form-label">Date de début</label>
+        <input type="date" asp-for="StartDate" class="form-control" value="" required />
+        <span asp-validation-for="StartDate" class="text-danger"></span>
+    </div>
+
+
+    <div class="mb-3">
+        <label for="EndDate" class="form-label">Date de fin</label>
+        <input type="date" asp-for="EndDate" class="form-control" />
+        <span asp-validation-for="EndDate" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Ajouter</button>
+</form>
+

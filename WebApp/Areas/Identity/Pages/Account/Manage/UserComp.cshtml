@@ -1,0 +1,73 @@
+﻿@page
+@model UserCompModel
+
+<h3>Compétences de l'utilisateur</h3>
+
+<!-- Bouton pour ouvrir la modale -->
+<button type="button" class="btn btn-primary mb-4" data-bs-toggle="modal" data-bs-target="#addRequirementModal">
+    Ajouter une compétence
+</button>
+
+<!-- Modale Bootstrap -->
+<div class="modal fade" id="addRequirementModal" tabindex="-1" aria-labelledby="addRequirementModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addRequirementModalLabel">Ajouter une compétence</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                @Html.Partial("~/Views/TUserRequirements/AddRequirement.cshtml", new WebApp.Models.TUserRequirement())
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Liste des compétences affichées en ligne -->
+<div class="list-group">
+    @foreach (var requirement in Model.UserRequirements)
+    {
+        <div class="list-group-item d-flex align-items-center justify-content-between ">
+            <div>
+                <h5 class="mb-1">@requirement.RequirementType.TypeName</h5>
+                <p class="mb-1">
+                    <strong>Évaluation personnelle :</strong> @requirement.PersonnalEvaluation <br>
+                    <strong>Date de début :</strong> @requirement.StartDate.ToString("yyyy-MM-dd") <br>
+                    <strong>Date de fin :</strong> @(requirement.EndDate.HasValue ? requirement.EndDate.Value.ToString("yyyy-MM-dd") : "jusqu'à ce jour")
+                </p>
+            </div>
+            <form asp-action="DeleteRequirement" asp-controller="TUserRequirements" method="post" style="display:inline;">
+                <input type="hidden" name="id" value="@requirement.Id" />
+                <button type="submit" class="btn btn-link text-dark p-0" style="text-decoration: none;" onclick="return confirm('Voulez-vous vraiment supprimer cette compétence ?');">
+                    Supprimer la compétence
+                </button>
+            </form>
+
+        </div>
+    }
+</div>
+
+<script>
+    $(document).ready(function () {
+        $('#addRequirementForm').on('submit', function (e) {
+            e.preventDefault();
+
+            $.ajax({
+                type: 'POST',
+                url: $(this).attr('action'),
+                data: $(this).serialize(),
+                success: function (response) {
+                    if (response.success) {
+                        $('#addRequirementModal').modal('hide'); // Ferme la modale
+                        location.reload(); // Recharge la page pour voir les modifications
+                    } else {
+                        alert("Une erreur est survenue. Veuillez réessayer.");
+                    }
+                },
+                error: function () {
+                    alert("Une erreur est survenue. Veuillez réessayer.");
+                }
+            });
+        });
+    });
+</script>
