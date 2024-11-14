@@ -1,0 +1,215 @@
+﻿@model PagedResult<WebApp.Models.TJobPost>
+@using PagedList.Core
+@using PagedList.Core.Mvc
+
+@{
+    ViewData["Title"] = "Offres d'emploi";
+}
+
+<h1>Offres d'emploi</h1>
+
+<div class="row">
+    <!-- Sidebar pour les filtres -->
+    <aside class="col-md-3">
+        <div class="bg-light p-3 mb-4 border rounded">
+            
+            <h4>Filtres</h4>
+            <form method="get" action="@Url.Action("List")" class="mb-4">
+                <div class="row">
+                    <div class="col-md-12">
+                        <label for="searchTitle">Trier par</label>
+                        <select id="sortOrder" name="sortOrder" class="form-select mb-2">
+                            <option value="compatibilityAsc">Compatibilité : Ordre croissant</option>
+                            <option value="compatibilityDesc">Compatibilité : Ordre décroissant</option>
+                            <option value="distanceAsc">Distance : Ordre croissant</option>
+                            <option value="distanceDesc">Distance : Ordre décroissant</option>
+                        </select>
+                    </div>
+
+                    <!-- Champ pour la recherche par compétence -->
+                    <div class="col-md-12">
+                        <label for="searchSkill">Compétence requise</label>
+                        <input type="text" id="searchSkill" name="searchSkill" placeholder="Compétence requise" class="form-control mb-2" value="@ViewData["searchSkill"]" />
+                    </div>
+
+                    <div class="col-md-12">
+                        <label for="searchCity">Ville</label>
+                        <input type="text" id="searchCity" name="searchCity" placeholder="Ville" class="form-control" value="@ViewData["searchCity"]" />
+                    </div>
+
+                    <div class="col-md-12">
+                        <label for="searchPosition">Poste</label>
+                        <input type="text" id="searchPosition" name="searchPosition" placeholder="Poste" class="form-control" value="@ViewData["searchPosition"]" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="minDistance">Distance min (km)</label>
+                        <input type="number" id="minDistance" name="minDistance" placeholder="Distance min (km)" class="form-control mb-2" value="@ViewData["minDistance"]" />
+                    </div>
+                    <div class="col-md-6">
+                        <label for="maxDistance">Distance max (km)</label>
+                        <input type="number" id="maxDistance" name="maxDistance" placeholder="Distance max (km)" class="form-control mb-2" value="@ViewData["maxDistance"]" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="minCompatibility">Compatibilité min (%)</label>
+                        <input type="number" id="minCompatibility" name="minCompatibility" placeholder="Compatibilité min (%)" class="form-control mb-2" value="@ViewData["minCompatibility"]" />
+                    </div>
+                    <div class="col-md-6">
+                        <label for="maxCompatibility">Compatibilité max (%)</label>
+                        <input type="number" id="maxCompatibility" name="maxCompatibility" placeholder="Compatibilité max (%)" class="form-control mb-2" value="@ViewData["maxCompatibility"]" />
+                    </div>
+
+                    <div class="col-md-12 mt-2">
+                        <button type="submit" class="btn btn-primary">Filtrer</button>
+                    </div>
+                </div>
+            </form>
+
+        </div>
+    </aside>
+
+    <!-- Contenu principal pour les résultats -->
+    <main class="col-md-9">
+        <div class="row">
+            @foreach (var jobPost in Model.Items)
+            {
+                <div class="col-md-6 mb-4">
+                    <div class="card shadow-sm h-100 d-flex flex-column">
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">@jobPost.Title</h5>
+                            <p class="card-text">
+                                <strong>Entreprise :</strong> @jobPost.Companie?.CompanieName <br>
+                                <strong>Description :</strong> @jobPost.Description <br>
+                                <strong>Type de contrat :</strong> @jobPost.TypeOfContract?.ContractName <br>
+                                <strong>Poste :</strong> @jobPost.Poste?.Title <br>
+                                <strong>Lieu :</strong> @jobPost.Site?.Title, @jobPost.Site?.City <br>
+
+                                <strong>Distance :</strong>
+                                @if (jobPost.Site.DistanceFromUser == -1)
+                                {
+                                    <span>Distance non disponible</span>
+                                }
+                                else
+                                {
+                                    <span>@jobPost.Site.DistanceFromUser km</span>
+                                }
+
+                                <br>
+                                <strong>Compatibilité du profil :</strong> @jobPost.CompatibilityScore.ToString("0.0") % <br>
+                            </p>
+
+                            <h6>Compétences requises :</h6>
+                            @if (jobPost.TJobPostRequirements != null && jobPost.TJobPostRequirements.Any())
+                            {
+                                <ul>
+                                    @foreach (var requirement in jobPost.TJobPostRequirements.Take(3))
+                                    {
+                                        <li>
+                                            <strong>@requirement.RequirementType.TypeName</strong> - Évaluation : @requirement.Evaluation, Expérience : @requirement.YearsOfExperience années
+                                        </li>
+                                    }
+                                    @if (jobPost.TJobPostRequirements.Count() > 3)
+                                    {
+                                        <li>... et @(@jobPost.TJobPostRequirements.Count() - 3) autres compétences</li>
+                                    }
+                                </ul>
+                            }
+                            else
+                            {
+                                <p>Aucune compétence requise définie pour ce post.</p>
+                            }
+
+                            <!-- The button is moved to the bottom with mt-auto -->
+                            <button class="btn btn-primary mt-auto" data-bs-toggle="modal" data-bs-target="#detailsModal-@jobPost.Id">
+                                Voir les détails
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Modal -->
+                <div class="modal fade" id="detailsModal-@jobPost.Id" tabindex="-1" aria-labelledby="detailsModalLabel-@jobPost.Id" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="detailsModalLabel-@jobPost.Id">@jobPost.Title – Détails</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p><strong>Entreprise :</strong> @jobPost.Companie?.CompanieName</p>
+                                <p><strong>Description :</strong> @jobPost.Description</p>
+                                <p><strong>Type de contrat :</strong> @jobPost.TypeOfContract?.ContractName</p>
+                                <p><strong>Poste :</strong> @jobPost.Poste?.Title</p>
+                                <p><strong>Lieu :</strong> @jobPost.Site?.Title, @jobPost.Site?.City</p>
+                                <p><strong>Adresse :</strong> @jobPost.Site?.Street, @jobPost.Site?.City, @jobPost.Site?.Postcode</p>
+                                <p><strong>Latitude :</strong> @jobPost.Site?.Latitude</p>
+                                <p><strong>Longitude :</strong> @jobPost.Site?.Longitude</p>
+                                <p>
+                                    <strong>Distance :</strong>
+                                    @if (jobPost.Site.DistanceFromUser == -1)
+                                    {
+                                        <span>Distance non disponible</span>
+                                    }
+                                    else
+                                    {
+                                        <span>@jobPost.Site.DistanceFromUser km</span>
+                                    }
+                                </p>
+                                <p><strong>Compatibilité du profil :</strong> @jobPost.CompatibilityScore.ToString("0.0") %</p>
+
+                                <h6>Compétences requises :</h6>
+                                @if (jobPost.TJobPostRequirements != null && jobPost.TJobPostRequirements.Any())
+                                {
+                                    <ul>
+                                        @foreach (var requirement in jobPost.TJobPostRequirements)
+                                        {
+                                            <li>
+                                                <strong>@requirement.RequirementType.TypeName</strong> – Évaluation : @requirement.Evaluation, Expérience : @requirement.YearsOfExperience années
+                                            </li>
+                                        }
+                                    </ul>
+                                }
+                                else
+                                {
+                                    <p>Aucune compétence requise définie pour ce post.</p>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Pagination -->
+        <div class="mt-4 pagination">
+            @if (Model.PageNumber > 1)
+            {
+                <a href="@Url.Action("List", new { page = Model.PageNumber - 1 })">Précédent</a>
+            }
+
+            Page @Model.PageNumber sur @Model.TotalPages
+
+            @if (Model.PageNumber < Model.TotalPages)
+            {
+                <a href="@Url.Action("List", new { page = Model.PageNumber + 1 })">Suivant</a>
+            }
+        </div>
+    </main>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                modal.addEventListener('show.bs.modal', function (event) {
+                    const button = event.relatedTarget;
+                    const modalTitle = modal.querySelector('.modal-title');
+                    const modalBody = modal.querySelector('.modal-body');
+                });
+            });
+        });
+    </script>
+}

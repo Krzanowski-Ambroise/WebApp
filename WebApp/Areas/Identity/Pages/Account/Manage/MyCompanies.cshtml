@@ -1,0 +1,62 @@
+﻿@page
+@model WebApp.Areas.Identity.Pages.Account.Manage.MyCompaniesModel
+@{
+    ViewData["ActivePage"] = ManageNavPages.MyCompany;
+    ViewData["Title"] = "Mes Entreprises";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<p>Voici les entreprises associées à votre compte :</p>
+
+@if (Model.AssociatedCompanies.Any())
+{
+    <div class="row">
+        @foreach (var company in Model.AssociatedCompanies)
+        {
+            <div class="col-md-6 mb-4">
+                <div class="card shadow-sm h-100 d-flex flex-column">
+                    <div class="card-body flex-grow-1 d-flex flex-column">
+                        <h5 class="card-title">@company.CompanieName</h5>
+                        <p class="card-text flex-grow-1">
+                            <strong>SIRET :</strong> @company.Siret <br>
+                            <strong>Description :</strong> @company.Description <br>
+                            <strong>Date de création :</strong> @company.CreationDate?.ToString("dd/MM/yyyy") <br>
+                            <strong>Téléphone :</strong> @company.Phone <br>
+                            <strong>Site web :</strong>
+                            @if (!string.IsNullOrEmpty(company.Website))
+                            {
+                                <a href="@company.Website" target="_blank">@company.Website</a>
+                            }
+                            else
+                            {
+                                <span>N/A</span>
+                            }
+                        </p>
+                        <div class="row mt-3">
+                            @if (User.IsInRole("Enterprise"))
+                            {
+                                <div class="col-6">
+                                    <a class="btn btn-info w-100" asp-page="./ViewPosts" asp-route-companyId="@company.Id">Voir les posts</a>
+                                </div>
+                                <div class="col-6">
+                                    <a class="btn btn-primary w-100" asp-page="./ManageCompany" asp-route-companyId="@company.Id">Gérer</a>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="col-12">
+                                    <a class="btn btn-info w-100" asp-page="./ViewPosts" asp-route-companyId="@company.Id">Voir les posts</a>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <p>Vous n'avez aucune entreprise associée pour le moment.</p>
+}
