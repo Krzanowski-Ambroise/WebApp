@@ -15,6 +15,7 @@ using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Authorization;
+using Newtonsoft.Json;
 
 
 namespace WebApp.Controllers
@@ -196,22 +197,22 @@ namespace WebApp.Controllers
             return _context.TJobPosts.Any(e => e.Id == id);
         }
 
-        // Méthode List pour calculer et afficher les distances
         [Authorize]
         public async Task<IActionResult> List(
-    string searchTitle,
-    string searchSkill,
-    string searchCompany,
-    string searchCity,
-    string searchPosition,
-    int? minDistance,
-    int? maxDistance,
-    int? minCompatibility,
-    int? maxCompatibility,
-    string sortOrder,
-    int page = 1,
-    int pageSize = 5)
+            string searchTitle,
+            string searchSkill,
+            string searchCompany,
+            string searchCity,
+            string searchPosition,
+            int? minDistance,
+            int? maxDistance,
+            int? minCompatibility,
+            int? maxCompatibility,
+            string sortOrder,
+            int page = 1,
+            int pageSize = 8)
         {
+            // Charger les données initiales des offres d'emploi
             var jobPostsQuery = _context.TJobPosts
                 .Include(jp => jp.TypeOfContract)
                 .Include(jp => jp.Poste)
@@ -221,24 +222,40 @@ namespace WebApp.Controllers
                 .Include(jp => jp.Companie)
                 .AsQueryable();
 
+            // Récupérer l'utilisateur connecté
             var user = await _userManager.GetUserAsync(User);
             if (user == null || !user.Latitude.HasValue || !user.Longitude.HasValue)
             {
                 ModelState.AddModelError(string.Empty, "Impossible de calculer la distance sans localisation utilisateur.");
-                return View(await jobPostsQuery.ToListAsync());
+
+                // Retourner un résultat paginé vide pour éviter les erreurs
+                var emptyPagedResult = new PagedResult<TJobPost>
+                {
+                    Items = new List<TJobPost>(),
+                    TotalItems = 0,
+                    PageNumber = page,
+                    PageSize = pageSize
+                };
+
+                return View(emptyPagedResult);
             }
 
             double userLatitude = user.Latitude.Value;
             double userLongitude = user.Longitude.Value;
 
+            // Calculer l'expérience totale de l'utilisateur
+            int userExperience = await CalculateUserExperience(user.Id);
+
+            // Charger les offres d'emploi dans une liste
             var jobPosts = await jobPostsQuery.ToListAsync();
 
-            // Calculer la distance pour chaque offre
+            // Filtrer les postes avec des coordonnées valides
             var jobLocations = jobPosts
                 .Where(jp => jp.Site != null && jp.Site.Latitude.HasValue && jp.Site.Longitude.HasValue)
                 .Select(jp => (jp.Site.Latitude.Value, jp.Site.Longitude.Value))
                 .ToList();
 
+            // Calculer les distances via l'API Geoapify
             var (distances, requestJson, responseJson) = await CalculateDistancesAsync(userLatitude, userLongitude, jobLocations);
             ViewData["RequestJson"] = requestJson;
             ViewData["ResponseJson"] = responseJson;
@@ -320,6 +337,40 @@ namespace WebApp.Controllers
                 _ => jobPosts
             };
 
+            /* Préparer les données pour l'API ChatGPT
+            var jsonData = new
+            {
+                User = new
+                {
+                    Age = user.DateOfBirth.HasValue ? DateTime.Now.Year - user.DateOfBirth.Value.Year : 0,
+                    Experience = userExperience,
+                    CurrentPosition = ""
+                },
+                JobPosts = jobPosts.Select(jp => new
+                {
+                    jp.Id,
+                    jp.Title,
+                    jp.CompatibilityScore,
+                    DistanceFromUser = jp.Site?.DistanceFromUser,
+                    CompanyName = jp.Companie?.CompanieName,
+                    City = jp.Site?.City,
+                    PositionTitle = jp.Poste?.Title,
+                    ContractType = jp.TypeOfContract?.ContractName
+                }).ToList()
+            };
+
+            // Envoyer les données à ChatGPT
+            var apiResponse = await SendToChatGPT(JsonConvert.SerializeObject(jsonData));
+
+            // Traiter la réponse JSON de ChatGPT
+            var bestJobPosts = JsonConvert.DeserializeObject<List<BestJobPost>>(apiResponse); 
+            
+            Je m'étais chauffer mais vas-y c'est payant chatgpt
+            
+            Cependant j'ai quand meme fait la methode pour l'appeler avec l'envoi du json
+            
+            */
+            
             // Exécution de la pagination
             int totalItems = jobPosts.Count;
             var pagedItems = jobPosts.Skip((page - 1) * pageSize).Take(pageSize).ToList();
@@ -331,6 +382,9 @@ namespace WebApp.Controllers
                 PageNumber = page,
                 PageSize = pageSize
             };
+
+            // Ajouter les meilleurs postes pour affichage
+            //ViewData["BestJobPosts"] = bestJobPosts;
 
             // Stocker les valeurs de filtre pour les conserver après soumission
             ViewData["searchTitle"] = searchTitle;
@@ -346,6 +400,74 @@ namespace WebApp.Controllers
 
             return View(pagedResult);
         }
+
+        
+        // Méthode pour envoyer les données à l'API ChatGPT
+        private async Task<string> SendToChatGPT(string jsonRequest)
+        {
+            var apiKey = _configuration["OpenAI:ApiKey"];
+            var apiUrl = "https://api.openai.com/v1/chat/completions";
+
+            var payload = new
+            {
+                model = "gpt-4",
+                messages = new[]
+                {
+                    new { role = "system", content = "You are an AI assistant tasked with analyzing job posts." },
+                    new { role = "user", content = $"Given this JSON data, return the top 5 job posts for the user with detailed reasoning: {jsonRequest}" }
+                }
+            };
+
+            var requestBody = JsonConvert.SerializeObject(payload);
+
+            using var httpClient = new HttpClient();
+            httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", apiKey);
+
+            var response = await httpClient.PostAsync(apiUrl, new StringContent(requestBody, Encoding.UTF8, "application/json"));
+            response.EnsureSuccessStatusCode();
+
+            return await response.Content.ReadAsStringAsync();
+        }
+
+        // Classe pour le résultat des meilleurs postes
+        public class BestJobPost
+        {
+            public int Id { get; set; }
+            public string Title { get; set; }
+            public string Reason { get; set; }
+        }
+        
+        private async Task<int> CalculateUserExperience(string userId)
+        {
+            // Récupérer toutes les expériences de l'utilisateur
+            var experiences = await _context.TExerces
+                .Where(e => e.UserId == userId)
+                .ToListAsync();
+
+            int totalYears = 0;
+
+            foreach (var experience in experiences)
+            {
+                // Si une date de fin n'est pas définie, utiliser la date actuelle
+                var endDate = experience.EndDate ?? DateOnly.FromDateTime(DateTime.Now);
+
+                // Calculer la différence en années
+                int years = endDate.Year - experience.StartDate.Year;
+
+                // Ajuster si l'année de début est plus tard dans l'année
+                if (experience.StartDate > endDate.AddYears(-years))
+                {
+                    years--;
+                }
+
+                totalYears += years;
+            }
+
+            return totalYears;
+        }
+
+
+
 
         // Fonction pour normaliser la chaîne de caractères en supprimant la ponctuation et en convertissant en minuscules
         private string NormalizeString(string input)
@@ -426,14 +548,14 @@ namespace WebApp.Controllers
                 targets = jobLocations.Select(location => new { location = new[] { location.longitude, location.latitude } }).ToArray()
             };
 
-            var requestJson = JsonSerializer.Serialize(payload);
+            var requestJson = Newtonsoft.Json.JsonConvert.SerializeObject(payload);
 
             using (var httpClient = new HttpClient())
             {
                 var response = await httpClient.PostAsync(url, new StringContent(requestJson, Encoding.UTF8, "application/json"));
                 var responseBody = await response.Content.ReadAsStringAsync();
 
-                var matrixResponse = JsonSerializer.Deserialize<RouteMatrixResponse>(responseBody);
+                var matrixResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<RouteMatrixResponse>(responseBody);
 
                 var distances = matrixResponse?.sources_to_targets?[0]?.Select(entry => entry.distance).ToList() ?? new List<double>();
 

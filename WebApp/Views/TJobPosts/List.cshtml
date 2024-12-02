@@ -1,6 +1,7 @@
 ﻿@model PagedResult<WebApp.Models.TJobPost>
 @using PagedList.Core
 @using PagedList.Core.Mvc
+@using WebApp.Controllers
 
 @{
     ViewData["Title"] = "Offres d'emploi";
@@ -67,6 +68,26 @@
             </form>
 
         </div>
+        <div>
+            <h3>Top 5 meilleurs postes</h3>
+            <ul>
+                @if (ViewData["BestJobPosts"] is List<TJobPostsController.BestJobPost> bestJobPosts)
+                {
+                    foreach (var post in bestJobPosts)
+                    {
+                        <li>
+                            <strong>@post.Title</strong> (ID: @post.Id)
+                            <p>@post.Reason</p>
+                        </li>
+                    }
+                }
+                else
+                {
+                    <li>Aucun résultat disponible pour le moment.</li>
+                }
+            </ul>
+        </div>
+
     </aside>
 
     <!-- Contenu principal pour les résultats -->
@@ -92,11 +113,22 @@
                                 }
                                 else
                                 {
-                                    <span>@jobPost.Site.DistanceFromUser km</span>
+                                    <span>
+                                        @if (jobPost.Site.DistanceFromUser < 1)
+                                        {
+                                            @($"{(jobPost.Site.DistanceFromUser * 1000):0} m")
+                                        }
+                                        else
+                                        {
+                                            @($"{jobPost.Site.DistanceFromUser:0.0} km")
+                                        }
+                                    </span>
+
                                 }
 
                                 <br>
-                                <strong>Compatibilité du profil :</strong> @jobPost.CompatibilityScore.ToString("0.0") % <br>
+                                <strong>Compatibilité du profil :</strong> @(@jobPost.CompatibilityScore < 0 ? "0" : @jobPost.CompatibilityScore.ToString("0.0"))
+                                % <br>
                             </p>
 
                             <h6>Compétences requises :</h6>
@@ -144,8 +176,6 @@
                                 <p><strong>Poste :</strong> @jobPost.Poste?.Title</p>
                                 <p><strong>Lieu :</strong> @jobPost.Site?.Title, @jobPost.Site?.City</p>
                                 <p><strong>Adresse :</strong> @jobPost.Site?.Street, @jobPost.Site?.City, @jobPost.Site?.Postcode</p>
-                                <p><strong>Latitude :</strong> @jobPost.Site?.Latitude</p>
-                                <p><strong>Longitude :</strong> @jobPost.Site?.Longitude</p>
                                 <p>
                                     <strong>Distance :</strong>
                                     @if (jobPost.Site.DistanceFromUser == -1)
@@ -157,7 +187,7 @@
                                         <span>@jobPost.Site.DistanceFromUser km</span>
                                     }
                                 </p>
-                                <p><strong>Compatibilité du profil :</strong> @jobPost.CompatibilityScore.ToString("0.0") %</p>
+                                <p><strong>Compatibilité du profil :</strong> @(@jobPost.CompatibilityScore < 0 ? "0" : @jobPost.CompatibilityScore.ToString("0.0")) %</p>
 
                                 <h6>Compétences requises :</h6>
                                 @if (jobPost.TJobPostRequirements != null && jobPost.TJobPostRequirements.Any())
@@ -183,18 +213,70 @@
         </div>
 
         <!-- Pagination -->
-        <div class="mt-4 pagination">
-            @if (Model.PageNumber > 1)
-            {
-                <a href="@Url.Action("List", new { page = Model.PageNumber - 1 })">Précédent</a>
-            }
+        <div class="mt-4 d-flex justify-content-center">
+            <nav aria-label="Pagination">
+                <ul class="pagination">
+                    @if (Model.PageNumber > 1)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="@Url.Action("List", new {
+                                                           page = Model.PageNumber - 1,
+                                                           searchTitle = ViewData["searchTitle"],
+                                                           searchSkill = ViewData["searchSkill"],
+                                                           searchCompany = ViewData["searchCompany"],
+                                                           searchCity = ViewData["searchCity"],
+                                                           searchPosition = ViewData["searchPosition"],
+                                                           minDistance = ViewData["minDistance"],
+                                                           maxDistance = ViewData["maxDistance"],
+                                                           minCompatibility = ViewData["minCompatibility"],
+                                                           maxCompatibility = ViewData["maxCompatibility"],
+                                                           sortOrder = ViewData["sortOrder"]
+                                                       })" aria-label="Précédent">
+                                <span aria-hidden="true">&laquo;</span> Précédent
+                            </a>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="page-item disabled">
+                            <span class="page-link" aria-hidden="true">&laquo; Précédent</span>
+                        </li>
+                    }
 
-            Page @Model.PageNumber sur @Model.TotalPages
+                    <li class="page-item disabled">
+                        <span class="page-link">
+                            Page @Model.PageNumber sur @Model.TotalPages
+                        </span>
+                    </li>
 
-            @if (Model.PageNumber < Model.TotalPages)
-            {
-                <a href="@Url.Action("List", new { page = Model.PageNumber + 1 })">Suivant</a>
-            }
+                    @if (Model.PageNumber < Model.TotalPages)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="@Url.Action("List", new {
+                                                           page = Model.PageNumber + 1,
+                                                           searchTitle = ViewData["searchTitle"],
+                                                           searchSkill = ViewData["searchSkill"],
+                                                           searchCompany = ViewData["searchCompany"],
+                                                           searchCity = ViewData["searchCity"],
+                                                           searchPosition = ViewData["searchPosition"],
+                                                           minDistance = ViewData["minDistance"],
+                                                           maxDistance = ViewData["maxDistance"],
+                                                           minCompatibility = ViewData["minCompatibility"],
+                                                           maxCompatibility = ViewData["maxCompatibility"],
+                                                           sortOrder = ViewData["sortOrder"]
+                                                       })" aria-label="Suivant">
+                                Suivant <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="page-item disabled">
+                            <span class="page-link" aria-hidden="true">Suivant &raquo;</span>
+                        </li>
+                    }
+                </ul>
+            </nav>
         </div>
     </main>
 </div>
