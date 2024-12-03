@@ -25,9 +25,29 @@ namespace WebApp.Controllers
         {
             return View(await _context.TCompanies.ToListAsync());
         }
+        public async Task<IActionResult> List()
+        {
+            return View(await _context.TCompanies.ToListAsync());
+        }
 
         // GET: TCompanies/Details/5
         public async Task<IActionResult> Details(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var tCompany = await _context.TCompanies
+                .FirstOrDefaultAsync(m => m.Id == id);
+            if (tCompany == null)
+            {
+                return NotFound();
+            }
+
+            return View(tCompany);
+        }
+        public async Task<IActionResult> ListDetails(int? id)
         {
             if (id == null)
             {

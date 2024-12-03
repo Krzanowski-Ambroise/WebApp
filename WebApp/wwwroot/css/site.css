@@ -1,3 +1,22 @@
+/* Vous pouvez changer ces trois valeurs */
+:root {
+    --c: gainsboro; /* Couleur des lignes de la grille */
+    --d: 1em;       /* Taille des cellules de la grille */
+    --l: 1px;       /* Épaisseur des lignes */
+}
+
+/* Valeur calculée */
+:root {
+    --o: calc(0.5 * var(--l));
+}
+
+body {
+    background-color: #fafaff;
+    opacity: 1;
+    background-image: radial-gradient(#b8bbff 0.65px, #fafaff 0.65px);
+    background-size: 13px 13px;
+}
+
 html {
   font-size: 14px;
 }
@@ -15,11 +34,6 @@ html {
 html {
   position: relative;
   min-height: 100%;
-}
-
-body {
-  margin-bottom: 60px;
-  font-family:Roboto,sans-serif;
 }
 
 /*tab navigation*/
@@ -44,4 +58,11 @@ body {
 
 .login-logout-card .card-body {
     padding: 10px 20px;
+}
+
+.form-search{
+}
+
+.form-search .form-control {
+    
 }

@@ -1,11 +1,4 @@
-﻿@{
-    // Vérifiez si vous êtes sur la page d'accueil
-
-    bool isHomePage = ViewContext.RouteData.Values["controller"]?.ToString() == "Home"
-
-                      && ViewContext.RouteData.Values["action"]?.ToString() == "Index";
-}
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -17,47 +10,76 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-md navbar-light bg-white border-bottom box-shadow mb-3">
+<header>
+    <nav class="navbar navbar-expand-md navbar-light bg-white border-bottom shadow-sm">
+        <div class="container">
+            <a class="navbar-brand fw-normal" asp-area="" asp-controller="Home" asp-action="Index">InfoSphere</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                    aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
 
-            <div class="container">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">InfoSphere</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
+            <!-- Navigation Links -->
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/TJobPosts/List">Offres d'emploi</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/TCompanies/List">Entreprises</a>
+                    </li>
+                </ul>
 
-                <!-- Navigation Links -->
-                <div class="collapse navbar-collapse">
-                    <ul class="navbar-nav me-auto">
-                        <li class="nav-item">
-                            <a class="nav-link" href="/TJobPosts/List" style="color: black">Offres d'emploi</a>
-                        </li>
-                    </ul>
-
-                    <!-- Right Aligned User Info -->
-                    <div class="d-flex">
-                        <partial name="_LoginPartial.cshtml" />
-                    </div>
+                <!-- Right Aligned User Info -->
+                <div class="d-flex">
+                    <partial name="_LoginPartial.cshtml" />
                 </div>
             </div>
-        </nav>
-    </header>
-
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
-
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2023 - AuthSystem - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>
-    </footer>
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    @await RenderSectionAsync("Scripts", required: false)
+    </nav>
+</header>
+
+<div class="container">
+    <main role="main" class="pb-3">
+        @RenderBody()
+    </main>
+</div>
+
+<footer class="py-3">
+    <div class="container">
+        <div class="row text-center text-md-start">
+            <div class="col-md-4 mb-3">
+                <h6 class="fw-bold">À propos</h6>
+                <p class="small text-muted">InfoSphere est votre plateforme dédiée pour explorer des offres d'emploi, découvrir des entreprises et enrichir vos compétences.</p>
+            </div>
+            <div class="col-md-4 mb-3">
+                <h6 class="fw-bold">Liens rapides</h6>
+                <ul class="list-unstyled small">
+                    <li><a href="/Home/Privacy" class="text-muted">Politique de confidentialité</a></li>
+                    <li><a asp-controller="TJobPosts" asp-action="List" class="text-muted">Offres d'emploi</a></li>
+                    <li><a asp-controller="TCompanies" asp-action="List" class="text-muted">Entreprises</a></li>
+                </ul>
+            </div>
+            <div class="col-md-4 mb-3">
+                <h6 class="fw-bold">Contact</h6>
+                <address class="small text-muted">
+                    <strong>InfoSphere</strong><br>
+                    123 Rue des Emplois<br>
+                    Cambrin, France<br>
+                    <abbr title="Téléphone">Tel.:</abbr> +33 1 23 45 67 89
+                </address>
+                <p class="small text-muted">Email : <a href="mailto:contact@infosphere.com" class="text-muted">contact@infosphere.com</a></p>
+            </div>
+        </div>
+        <div class="text-center small text-muted border-top pt-3 mt-3">
+            &copy; 2023 InfoSphere - Tous droits réservés.
+        </div>
+    </div>
+</footer>
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="~/js/site.js" asp-append-version="true"></script>
+@await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

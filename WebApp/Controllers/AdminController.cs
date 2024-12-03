@@ -195,5 +195,98 @@ namespace WebApp.Controllers
 
             return RedirectToAction("ManageCompanies", new { userId });
         }
+        // Affiche la vue pour ajouter un rôle
+        public async Task<IActionResult> AddRole(string id)
+        {
+            if (string.IsNullOrEmpty(id))
+            {
+                return BadRequest("L'ID utilisateur est requis.");
+            }
+
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null)
+            {
+                return NotFound("Utilisateur introuvable.");
+            }
+
+            // Récupération des rôles
+            var allRoles = _roleManager.Roles.Select(r => r.Name).ToList();
+            var userRoles = await _userManager.GetRolesAsync(user);
+            var availableRoles = allRoles.Except(userRoles).ToList();
+
+            // Création du modèle
+            var model = new AddRoleViewModel
+            {
+                UserId = id,
+                UserName = user.UserName,
+                AvailableRoles = availableRoles,
+                UserRoles = userRoles.ToList()
+            };
+
+            // Retourne une vue complète
+            return View(model); // Assurez-vous que la vue AddRole.cshtml existe
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddRole(AddRoleViewModel model)
+        {
+            if (string.IsNullOrEmpty(model.UserId) || string.IsNullOrEmpty(model.SelectedRole))
+            {
+                ModelState.AddModelError(string.Empty, "Les informations nécessaires ne sont pas complètes.");
+                return View(model);
+            }
+
+            var user = await _userManager.FindByIdAsync(model.UserId);
+            if (user == null)
+            {
+                return NotFound("Utilisateur introuvable.");
+            }
+
+            if (await _userManager.IsInRoleAsync(user, model.SelectedRole))
+            {
+                ModelState.AddModelError(string.Empty, "L'utilisateur a déjà ce rôle.");
+                return View(model);
+            }
+
+            var result = await _userManager.AddToRoleAsync(user, model.SelectedRole);
+            if (!result.Succeeded)
+            {
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
+                return View(model);
+            }
+
+            return RedirectToAction("ListUser");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RemoveRole(string userId, string roleName)
+        {
+            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(roleName))
+            {
+                return BadRequest("Les informations nécessaires ne sont pas complètes.");
+            }
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return NotFound("Utilisateur introuvable.");
+            }
+
+            var result = await _userManager.RemoveFromRoleAsync(user, roleName);
+            if (!result.Succeeded)
+            {
+                TempData["Error"] = "Erreur lors de la suppression du rôle.";
+            }
+
+            return RedirectToAction("AddRole", new { id = userId }); // Recharge la vue
+        }
+
+
+
     }
 }

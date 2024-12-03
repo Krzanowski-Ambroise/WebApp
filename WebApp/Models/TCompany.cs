@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace WebApp.Models;
 
@@ -8,7 +9,9 @@ public partial class TCompany
     public int Id { get; set; }
 
     public string CompanieName { get; set; } = null!;
-
+    
+    [MaxLength(11)]
+    [StringLength(11, ErrorMessage = "Le champ Siret ne peut pas dépasser 11 caractères.")] 
     public string? Siret { get; set; }
 
     public string? Description { get; set; }
