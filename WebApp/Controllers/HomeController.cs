@@ -26,9 +26,9 @@ namespace WebApp.Controllers
             {
                 ViewData["UserId"] = user.Id;
 
-                // Récupérer les rôles de l'utilisateur connecté
+                // Rï¿½cupï¿½rer les rï¿½les de l'utilisateur connectï¿½
                 var roles = await _userManager.GetRolesAsync(user);
-                ViewData["Roles"] = string.Join(", ", roles); // Convertir en chaîne si plusieurs rôles
+                ViewData["Roles"] = string.Join(", ", roles); // Convertir en chaï¿½ne si plusieurs rï¿½les
             }
             else
             {
@@ -37,8 +37,7 @@ namespace WebApp.Controllers
             }
             return View();
         }
-
-        [Authorize(Roles = "Admin")]
+        
         public IActionResult Privacy()
         {
             return View();

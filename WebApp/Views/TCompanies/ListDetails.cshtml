@@ -1,0 +1,40 @@
+﻿@model WebApp.Models.TCompany
+
+@{
+    ViewData["Title"] = "Détails de l'entreprise";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1 class="text-center my-4">Détails de l'entreprise</h1>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <h4 class="card-title">@Html.DisplayFor(model => model.CompanieName)</h4>
+        <hr />
+        <dl class="row">
+            <dt class="col-sm-4 font-weight-bold">Nom de l'entreprise</dt>
+            <dd class="col-sm-8">@Html.DisplayFor(model => model.CompanieName)</dd>
+
+            <dt class="col-sm-4 font-weight-bold">SIRET</dt>
+            <dd class="col-sm-8">@Html.DisplayFor(model => model.Siret)</dd>
+
+            <dt class="col-sm-4 font-weight-bold">Description</dt>
+            <dd class="col-sm-8">@Html.DisplayFor(model => model.Description)</dd>
+
+            <dt class="col-sm-4 font-weight-bold">Date de création</dt>
+            <dd class="col-sm-8">@Html.DisplayFor(model => model.CreationDate)</dd>
+
+            <dt class="col-sm-4 font-weight-bold">Téléphone</dt>
+            <dd class="col-sm-8">@Html.DisplayFor(model => model.Phone)</dd>
+
+            <dt class="col-sm-4 font-weight-bold">Site web</dt>
+            <dd class="col-sm-8">
+                <a href="@Model.Website" target="_blank">@Html.DisplayFor(model => model.Website)</a>
+            </dd>
+        </dl>
+    </div>
+</div>
+
+<div class="text-center">
+    <a asp-action="List" class="btn btn-secondary">Retour à la liste</a>
+</div>

@@ -2,15 +2,15 @@
     ViewData["Title"] = "Home Page";
 }
 
-<div class="container mt-5 text-center" style="max-width: 800px;">
+<div class="container mt-5 text-center" style="max-width: 800px;margin-bottom: 20vh">
     <!-- Titre principal de la page -->
     <h1 class="display-4">Bienvenue sur InfoSphere</h1>
     <p class="lead mb-4">Trouvez facilement des offres d'emploi et des entreprises !</p>
 
     <!-- Formulaire de recherche centralisé avec largeur limitée -->
-    <form class="d-flex justify-content-center mb-5" method="get" action="/TJobPosts/List">
-        <input class="form-control form-control-lg me-2" style="max-width: 500px;" type="search" name="searchTitle" placeholder="Rechercher un poste, une entreprise ou une compétence" aria-label="Search" value="@ViewData["searchTitle"]">
-        <button class="btn btn-outline-success btn-lg" type="submit">Rechercher</button>
+    <form class="d-flex justify-content-center mb-5 form-search" method="get" action="/TJobPosts/List">
+        <input class="form-control form-control-lg me-2 shadow" type="search" name="searchTitle" placeholder="Rechercher un poste, une entreprise ou une compétence" aria-label="Search" value="@ViewData["searchTitle"]">
+        <button class="btn btn-primary btn-lg" type="submit">Rechercher</button>
     </form>
 
     <!-- Suggestions de sections pour donner de la structure à la page -->

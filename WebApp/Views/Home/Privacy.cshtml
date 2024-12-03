@@ -1,6 +1,56 @@
 ﻿@{
-    ViewData["Title"] = "Privacy Policy";
+    ViewData["Title"] = "Politique de Confidentialité";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
-<h1>@ViewData["Title"]</h1>
 
-<p>Use this page to detail your site's privacy policy.</p>
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Politique de Confidentialité</h1>
+
+    <p>Chez <strong>InfoSphere</strong>, nous attachons une grande importance à la protection de vos données personnelles. Cette politique de confidentialité décrit comment nous collectons, utilisons et protégeons vos informations.</p>
+
+    <hr class="my-4" />
+
+    <h3>1. Informations que nous collectons</h3>
+    <p>Nous collectons les types d’informations suivants :</p>
+    <ul>
+        <li><strong>Informations personnelles :</strong> telles que votre nom, adresse électronique, numéro de téléphone.</li>
+        <li><strong>Données de navigation :</strong> telles que votre adresse IP, type de navigateur et pages consultées sur notre site.</li>
+        <li><strong>Informations fournies volontairement :</strong> telles que les données soumises dans les formulaires ou lors de la création de votre profil.</li>
+    </ul>
+
+    <h3>2. Comment nous utilisons vos informations</h3>
+    <p>Nous utilisons vos informations pour :</p>
+    <ul>
+        <li>Vous fournir des services personnalisés.</li>
+        <li>Améliorer notre site web et nos offres d'emploi.</li>
+        <li>Vous envoyer des mises à jour, notifications ou communications pertinentes.</li>
+    </ul>
+
+    <h3>3. Partage de vos informations</h3>
+    <p>Nous ne partageons vos informations personnelles qu'avec :</p>
+    <ul>
+        <li>Des partenaires de confiance pour fournir les services demandés.</li>
+        <li>Les autorités compétentes, lorsque cela est requis par la loi.</li>
+    </ul>
+
+    <h3>4. Sécurité de vos données</h3>
+    <p>Nous mettons en place des mesures techniques et organisationnelles pour protéger vos données personnelles contre tout accès non autorisé, perte ou divulgation.</p>
+
+    <h3>5. Vos droits</h3>
+    <p>Vous disposez des droits suivants concernant vos données :</p>
+    <ul>
+        <li>Accéder à vos informations personnelles.</li>
+        <li>Demander la rectification ou la suppression de vos données.</li>
+        <li>Retirer votre consentement pour l’utilisation de vos données.</li>
+    </ul>
+    <p>Pour exercer vos droits, veuillez nous contacter à l'adresse suivante : <a href="mailto:contact@infosphere.com">contact@infosphere.com</a>.</p>
+
+    <h3>6. Modifications de cette politique</h3>
+    <p>Nous nous réservons le droit de mettre à jour cette politique de confidentialité. Toute modification sera publiée sur cette page avec une date de mise à jour.</p>
+
+    <p class="text-muted">Date de mise à jour : 1er décembre 2024</p>
+
+    <div class="text-center mt-4">
+        <a asp-action="Index" class="btn btn-secondary">Retour à l'accueil</a>
+    </div>
+</div>
