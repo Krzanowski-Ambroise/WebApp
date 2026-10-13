@@ -17,13 +17,14 @@ namespace WebApp.Areas.Identity.Pages.Account.Manage
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly WebAppContext _context;
+        private readonly IConfiguration _configuration;
 
         private async Task<(double? Latitude, double? Longitude)> GetCoordinatesAsync(string address)
         {
             // Appel à l'API pour récupérer les coordonnées
             using (var client = new HttpClient())
             {
-                string apiKey = "97063609c27c4515916e933ee4957fab";
+                string? apiKey = _configuration["Geoapify:ApiKey"];
                 string url = $"https://api.geoapify.com/v1/geocode/search?text={Uri.EscapeDataString(address)}&apiKey={apiKey}";
 
                 var response = await client.GetAsync(url);
@@ -44,10 +45,11 @@ namespace WebApp.Areas.Identity.Pages.Account.Manage
         }
 
 
-        public ManageCompanyModel(UserManager<ApplicationUser> userManager, WebAppContext context)
+        public ManageCompanyModel(UserManager<ApplicationUser> userManager, WebAppContext context, IConfiguration configuration)
         {
             _userManager = userManager;
             _context = context;
+            _configuration = configuration;
         }
 
         public TCompany Company { get; set; }

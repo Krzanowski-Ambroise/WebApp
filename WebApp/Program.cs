@@ -68,10 +68,15 @@ internal class Program
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
 
-            string email = "admin@admin.com";
-            string password = "6$7aU@K6jd";
+            // Admin account seeded from configuration (SeedAdmin:Email, SeedAdmin:Password), never hardcoded
+            string? email = app.Configuration["SeedAdmin:Email"];
+            string? password = app.Configuration["SeedAdmin:Password"];
 
-            if (await userManager.FindByEmailAsync(email) == null)
+            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
+            {
+                app.Logger.LogWarning("SeedAdmin:Email or SeedAdmin:Password is not set: the admin account is not created.");
+            }
+            else if (await userManager.FindByEmailAsync(email) == null)
             {
                 var user = new ApplicationUser();
                 user.UserName = email;
@@ -82,9 +87,10 @@ internal class Program
                 user.City = "Unknown";
 
 
-                await userManager.CreateAsync(user, password);
+                var result = await userManager.CreateAsync(user, password);
 
-                await userManager.AddToRoleAsync(user, "Admin");
+                if (result.Succeeded)
+                    await userManager.AddToRoleAsync(user, "Admin");
             }
         }
 
